@@ -1,7 +1,7 @@
-﻿using Elasticsearch.API.DTOs;
+﻿using Elastic.Clients.Elasticsearch;
+using Elasticsearch.API.DTOs;
 using Elasticsearch.API.Models;
 using Elasticsearch.API.Repository;
-using Nest;
 using System.Collections.Immutable;
 using System.Net;
 
@@ -70,19 +70,22 @@ namespace Elasticsearch.API.Services
             return ResponseDto<bool>.Succsess(true, HttpStatusCode.NoContent);
         }
 
-        public async Task<ResponseDto<bool>>DeleteAsync(string id)
+        public async Task<ResponseDto<bool>> DeleteAsync(string id)
         {
             var deleteResponse = await _productRepository.DeleteAsync(id);
 
-            if (!deleteResponse.IsValid && deleteResponse.Result==Result.NotFound)
+            if (!deleteResponse.IsSuccess() && deleteResponse.Result == Result.NotFound)
             {
-                return ResponseDto<bool>.Fail("silmeye calisdiginiz product tapilmadi", 
+                return ResponseDto<bool>.Fail("silmeye calisdiginiz product tapilmadi",
                     HttpStatusCode.NotFound);
             }
 
-            if(!deleteResponse.IsValid)
+            if (!deleteResponse.IsSuccess())
             {
-                _logger.LogError(deleteResponse.OriginalException, deleteResponse.ServerError.ToString());
+                deleteResponse.TryGetOriginalException(out Exception? exception);
+
+                _logger.LogError(exception, deleteResponse.ElasticsearchServerError!.Error.ToString());
+
                 return ResponseDto<bool>.Fail("silme zamani xeta bas verdi", HttpStatusCode.InternalServerError);
             }
 
