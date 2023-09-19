@@ -57,7 +57,7 @@ namespace Elasticsearch.API.Repository
             var response = await _client.UpdateAsync<Product, ProductUpdateDto>(indexName,updateProduct.Id,
                 x=>x.Doc(updateProduct));
 
-            return response.IsSuccess();
+            return response.IsValidResponse;
         }
 
         public async Task<DeleteResponse> DeleteAsync(string id) 

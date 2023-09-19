@@ -74,7 +74,7 @@ namespace Elasticsearch.API.Services
         {
             var deleteResponse = await _productRepository.DeleteAsync(id);
 
-            if (!deleteResponse.IsSuccess() && deleteResponse.Result == Result.NotFound)
+            if (!deleteResponse.IsValidResponse && deleteResponse.Result == Result.NotFound)
             {
                 return ResponseDto<bool>.Fail("silmeye calisdiginiz product tapilmadi",
                     HttpStatusCode.NotFound);
