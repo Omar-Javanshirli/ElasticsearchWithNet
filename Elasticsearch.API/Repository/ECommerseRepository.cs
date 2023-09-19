@@ -177,5 +177,89 @@ namespace Elasticsearch.API.Repository
             foreach (var hit in result.Hits) hit.Source!.Id = hit.Id;
             return result.Documents.ToImmutableList();
         }
+
+        public async Task<ImmutableList<ECommerse>> MatchPhraseQueryAsync(string customerFullname)
+        {
+            var result = await _client.SearchAsync<ECommerse>(s => s
+            .Index(indexName)
+            .Query(q => q
+            .MatchPhrase(m => m
+            .Field(f => f.Category)
+            .Query(customerFullname))));
+
+            foreach (var hit in result.Hits) hit.Source!.Id = hit.Id;
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerse>> CompoundQueryExampleOneAsync(string cityName, double taxFullTotalPrice,
+            string categoryName, string manuFacture)
+        {
+            var result = await _client.SearchAsync<ECommerse>(s => s
+            .Index(indexName)
+            .Query(q => q
+            .Bool(b => b
+            .Must(m => m
+                .Term(t => t
+                .Field("geoip.city_name")
+                .Value(cityName)))
+            .MustNot(mn => mn
+                .Range(r => r
+                .NumberRange(nr => nr
+                .Field(f => f.TaxFulTotalPrice)
+                .Lte(taxFullTotalPrice))))
+            .Should(should => should
+                .Term(t => t
+                .Field(f => f.Category
+                .Suffix("keyword"))
+                .Value(categoryName)))
+            .Filter(f => f
+                .Term(t => t
+                .Field("manufacture.keyword")
+                .Value(manuFacture))))));
+
+            foreach (var hit in result.Hits) hit.Source!.Id = hit.Id;
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerse>> CompundQueryExamoleTwoAsync(string customerFullname)
+        {
+            var result = await _client.SearchAsync<ECommerse>(s => s
+            .Index(indexName)
+            .Query(q => q
+            .MatchPhrasePrefix(m => m
+            .Field(f => f.CustomerFullname)
+            .Query(customerFullname))));
+
+            // var result = await _client.SearchAsync<ECommerse>(s => s
+            //.Index(indexName)
+            //.Query(q => q
+            //.Bool(b => b
+            //.Should(m => m
+            //     .Match(m => m
+            //         .Field(f => f.CustomerFullname)
+            //         .Query(customerFullname))
+            //     .Prefix(p => p
+            //         .Field(f => f.CustomerFullname
+            //         .Suffix("keyword"))
+            //         .Value(customerFullname))))));
+
+            foreach (var hit in result.Hits) hit.Source!.Id = hit.Id;
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerse>> MultiMatchQueryFullTextAsync(string name)
+        {
+            var result = await _client.SearchAsync<ECommerse>(s => s
+           .Index(indexName)
+           .Query(q => q
+           .MultiMatch(mm => mm
+                .Fields(new Field("customer_first_name")
+                .And(new Field("customer_last_name"))
+                .And(new Field("customer_full_name")))
+                .Query(name))));
+
+            foreach (var hit in result.Hits) hit.Source!.Id = hit.Id;
+            return result.Documents.ToImmutableList();
+        }
     }
 }

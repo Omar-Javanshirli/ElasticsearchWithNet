@@ -64,7 +64,7 @@ namespace Elasticsearch.API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> MatchQueryFullText (string categoryName)
+        public async Task<IActionResult> MatchQueryFullText(string categoryName)
         {
             return Ok(await _repository.MatchQuerFullTextAsync(categoryName));
         }
@@ -74,6 +74,32 @@ namespace Elasticsearch.API.Controllers
         public async Task<IActionResult> MatchBooleanPrefixFulltext(string categoryFullname)
         {
             return Ok(await _repository.MatchBooleanPrefixFulltextAsync(categoryFullname));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MatchPhraseQuery(string customerFullname)
+        {
+            return Ok(await _repository.MatchPhraseQueryAsync(customerFullname));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CompoundQueryExampleOne(string cityName, double taxFullTotalPrice,
+            string categoryName, string manuFacture)
+        {
+            return Ok(await _repository.CompoundQueryExampleOneAsync(cityName, taxFullTotalPrice, categoryName, manuFacture));
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> CompundQueryExamoleTwo(string customerFullname)
+        {
+            return Ok(await _repository.CompundQueryExamoleTwoAsync(customerFullname));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MultiMatchQueryFullText(string name)
+        {
+            return Ok(await _repository.MultiMatchQueryFullTextAsync(name));
         }
     }
 }
