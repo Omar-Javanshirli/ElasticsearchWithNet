@@ -28,9 +28,18 @@ namespace Elasticsearch.Web.Services
             return isCreated != null;
         }
 
-        public async Task<List<Blog>> SearchAsync(string searchText)
+        public async Task<List<BlogSearchViewModel>> SearchAsync(string searchText)
         {
-            return await _blogRepository.SearchAsync(searchText);
-        }
+            var blogList= await _blogRepository.SearchAsync(searchText);
+			return blogList.Select(b => new BlogSearchViewModel()
+			{
+				Id = b.Id,
+				Title = b.Title,
+				Content = b.Content,
+				Created = b.Created.ToShortDateString(),
+				Tags = String.Join(",", b.Tags),
+				UserId = b.UserId.ToString()
+			}).ToList();
+		}
     }
 }
