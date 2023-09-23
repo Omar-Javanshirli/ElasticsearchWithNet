@@ -52,13 +52,21 @@ namespace Elasticsearch.Web.Repositories
 				.Query(searchText));
 			};
 
-			if(string.IsNullOrEmpty(searchText))
+			Action<QueryDescriptor<Blog>> tagTerm = (q) =>
+			{
+				q.Term(t => t
+				.Field(f => f.Tags)
+				.Value(searchText));
+			};
+
+			if (string.IsNullOrEmpty(searchText))
 				listQuery.Add(matchAll);
 
             else
             {
 				listQuery.Add(matchContent);
 				listQuery.Add(titleMatchBollPrefix);
+				listQuery.Add(tagTerm);
             }
 
             var result = await _elasticSearchClient.SearchAsync<Blog>(s => s
